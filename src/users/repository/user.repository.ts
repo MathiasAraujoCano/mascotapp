@@ -17,7 +17,7 @@ export class UserRepository {
     }
 
 
-    findOneUser(id: number) : User {
+    findOneUser(id: string) : User {
 
         const verifyUser = this.usersArray.find( u => u.id === id)
 
@@ -44,7 +44,7 @@ export class UserRepository {
     }
 
 
-    update(id: number, userUpdate: User) : User {
+    update(id: string, userUpdate: User) : User {
         let user = this.findOneUser(id)
 
         if (!user) throw new NotFoundException(`User with id "${id}" not found`)
@@ -61,7 +61,7 @@ export class UserRepository {
     }
 
 
-    delete(id: number) : boolean {
+    delete(id: string) : boolean {
 
         const verifyUser = this.usersArray.filter(u => u.id !== id)
 

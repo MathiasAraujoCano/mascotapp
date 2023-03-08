@@ -1,12 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { v4 as uuid } from 'uuid';
 import { PostDto } from './dto/post.dto';
+
 
 @Injectable()
 export class PostsService {
 
     private Posts: PostDto[] = [
         {
-            id: 1,
+            id: uuid(),
             title: 'Vacunas',
             description: 'Cuarta vacuna',
             name: 'Peter'
@@ -16,7 +18,7 @@ export class PostsService {
     create( postDto: PostDto) {
 
         const post : PostDto = {
-            id: postDto.id,
+            id: uuid(),
             title: postDto.title,
             description: postDto.description,
             name: postDto.name
@@ -30,7 +32,7 @@ export class PostsService {
         return this.Posts;
     }
 
-    findOnePost( id: number) {
+    findOnePost( id: string) {
         const post = this.Posts.find(post => post.id === id)
 
         if (!post) throw new NotFoundException(`Post with id "${id}" not found`)
@@ -38,7 +40,7 @@ export class PostsService {
         return post;
     }
 
-    update( id: number, updateDto: PostDto) {
+    update( id: string, updateDto: PostDto) {
 
         let postToUpdate = this.findOnePost(id)
 
@@ -52,5 +54,10 @@ export class PostsService {
             return post;
         })
         return postToUpdate;
+    }
+
+
+    delete( id: string ) {
+        return this.Posts.filter(post => post.id !== id)
     }
 }

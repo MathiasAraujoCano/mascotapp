@@ -1,10 +1,7 @@
-import { IsEmail, IsInt, IsPositive, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
 
 export class UserDto {
-
-    @IsInt()
-    id: number;
 
     @IsString()
     @MinLength(1)

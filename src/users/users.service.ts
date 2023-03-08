@@ -1,71 +1,91 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { UserDto } from './dto/user.dto';
 import { User } from './entity/user.entity';
-import { UserRepository } from './repository/user.repository';
+import { validate as isUUID, v4 as uuid } from 'uuid';
 
 @Injectable()
 export class UsersService {
 
     constructor(
-        private userRepository: UserRepository
+        @InjectRepository(User)
+        private userRepository: Repository<User>
     ){}
 
-    private Users  : UserDto[] = [
-        {
-            id: 1,
-            name : 'Pablo',
-            lastName: 'Lescano',
-            email: 'plescano@damasgratis.com',
-            password: 'Abc123',
-        },
-        {
-            id: 2,
-            name : 'Danilo',
-            lastName: 'Alvarez',
-            email: 'daniloa@simple.com',
-            password: 'Abc123',
-        },
-    ]
 
-    findAll(): User[] {
-        return this.userRepository.findAll();
+    async findAll() {
+        const users = await this.userRepository.find();
+
+        return users;
     }
 
-    create( userDto: UserDto) : User {
+    async create( userDto: UserDto) {
         
         const user: User = {
-            id: userDto.id,
+            id: uuid(),
             name: userDto.name,
             lastName: userDto.lastName,
             email: userDto.email,
-            password: userDto.password
+            password: userDto.password,
+            doggy: [],
+            kitty: []
         }
 
-        return this.userRepository.create(user)
+        const userToCreate = this.userRepository.create(user)
+
+        await this.userRepository.save(userToCreate)
+
+        return userToCreate;
     }
 
-    findOneUser( id: number) : User {
+
+    async findOneUser( id: string) {
         
-        return this.userRepository.findOneUser(id)
+        let user: User;
+
+        if (isUUID(id)) {
+            user = await this.userRepository.findOneBy({id})
+        }  
+        
+        if ( !user ) {
+            throw new NotFoundException(`User with id "${id}" not found`)
+        }
+
+        return user;
     }
 
 
-    update(id: number, updateUser: UserDto) : User {
+    async update(id: string, updateUser: UserDto) {
         
-        const user: User = {
+
+        const userToUpdate = await this.userRepository.preload({
             id,
-            name: updateUser.name,
-            lastName: updateUser.lastName,
-            email: updateUser.email,
-            password: updateUser.password
+            ...updateUser
+        })
+
+        if ( !userToUpdate ) {
+            throw new NotFoundException(`Product with id: ${id} not found`)
         }
 
-        return this.userRepository.update(id, user)
+        const userUpdated = this.userRepository.save(userToUpdate)
+
+        return userUpdated;
     }
 
 
-    deleteOne( id: number) : string {
+    async deleteOne( id: string ) {
 
-        return this.userRepository.delete(id) ? `Delete success` : `User with id "${id}" not found`
+        const user = await this.findOneUser(id)
+
+        if (!user) {
+            throw new NotFoundException(`User with id "${id}" not found`)
+        }
+
+        await this.userRepository.remove(user)
+
+        return `Delete successful`
+       
     }
+
 }

@@ -1,10 +1,11 @@
-import { IsInt, IsString, Min, MinLength } from 'class-validator';
+import { IsString, IsUUID, Min, MinLength } from 'class-validator';
 
 
 export class PostDto {
 
-    @IsInt()
-    id: number;
+    @IsString()
+    @IsUUID()
+    id: string;
     
     @IsString()
     @MinLength(1)

@@ -4,11 +4,9 @@ import { IsArray, IsDate, IsIn, IsInt, IsString, IsUUID, MinDate, MinLength } fr
 
 export class AnimalDto {
 
-    // @IsString()
-    // @IsUUID()
-    // id: string;
-    @IsInt()
-    id: number;
+    @IsString()
+    @IsUUID()
+    id: string;
 
     @IsString()
     @MinLength(1)

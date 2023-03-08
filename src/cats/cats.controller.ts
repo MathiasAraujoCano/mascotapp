@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
 import { AnimalDto } from 'src/common/dto/animal.dto';
 import { CatsService } from './cats.service';
 
@@ -15,7 +15,7 @@ export class CatsController {
     }
 
     @Get(':id')
-    findOne( @Param('id', ParseIntPipe) id: number) {
+    findOne( @Param('id', ParseUUIDPipe) id: string) {
 
         return this.catsService.findOne(id);
     }
@@ -28,9 +28,15 @@ export class CatsController {
 
     @Patch(':id')
     update(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('id', ParseUUIDPipe) id: string,
         @Body() animalDto: AnimalDto) 
     {
         return this.catsService.update(id, animalDto)
+    }
+
+
+    @Delete(':id')
+    delete( @Param('id', ParseUUIDPipe) id: string) {
+        return this.catsService.delete(id)
     }
 }

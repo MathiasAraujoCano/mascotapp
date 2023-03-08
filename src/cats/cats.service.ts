@@ -7,7 +7,7 @@ export class CatsService {
 
     private Cats  : AnimalDto[] = [
         {
-        id: 1,
+        id: uuid(),
         name : 'Roberto',
         color: ['negro', 'blanco'],
         age: 3,
@@ -15,7 +15,7 @@ export class CatsService {
         born: new Date('2020-02-02')
     },
     {
-        id: 2,
+        id: uuid(),
         name : 'Adolf',
         color: ['amarillo'],
         age: 1,
@@ -29,7 +29,7 @@ export class CatsService {
     }
 
 
-    findOne( id: number ) {
+    findOne( id: string ) {
 
         const oneCat = this.Cats.find(cat => cat.id === id )
 
@@ -42,7 +42,7 @@ export class CatsService {
     create( animalDto: AnimalDto) {
 
         const cat : AnimalDto = {
-            id: animalDto.id,
+            id: uuid(),
             name : animalDto.name,
             color: animalDto.color,
             age: animalDto.age,
@@ -65,7 +65,7 @@ export class CatsService {
     }
 
 
-    update( id: number, updateDto: AnimalDto) {
+    update( id: string, updateDto: AnimalDto) {
 
         let catToUpdate = this.findOne( id )
 
@@ -80,5 +80,10 @@ export class CatsService {
         })
 
         return catToUpdate;
+    }
+
+
+    delete( id: string) {
+        return this.Cats.filter(cat => cat.id !== id)
     }
 }

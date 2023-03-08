@@ -1,12 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AnimalDto } from 'src/common/dto/animal.dto';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class DogsService {
 
     private Dogs  : AnimalDto[] = [
         {
-        id: 1,
+        id: uuid(),
         name : 'Snoopy',
         color: ['marron'],
         age: 3,
@@ -14,7 +15,7 @@ export class DogsService {
         born: new Date('2020-02-02')
     },
     {
-        id: 2,
+        id: uuid(),
         name : 'Scooby',
         color: ['negro'],
         age: 1,
@@ -26,7 +27,7 @@ export class DogsService {
     create( animalDto: AnimalDto) {
         
         const dog: AnimalDto = {
-            id: animalDto.id,
+            id: uuid(),
             name: animalDto.name,
             color: animalDto.color,
             age: animalDto.age,
@@ -51,7 +52,7 @@ export class DogsService {
     }
 
 
-    findOne(id: number) {
+    findOne(id: string) {
 
         const oneDog = this.Dogs.find(dog => dog.id === id);
 
@@ -61,7 +62,7 @@ export class DogsService {
     }
 
 
-    update( id: number, updateDto: AnimalDto) {
+    update( id: string, updateDto: AnimalDto) {
 
         let dogToUpdate = this.findOne(id)
 
@@ -75,5 +76,10 @@ export class DogsService {
             return doggy;
         })
         return dogToUpdate;
+    }
+
+
+    delete( id: string ) {
+        return this.Dogs.filter(dog => dog.id !== id)
     }
 }
