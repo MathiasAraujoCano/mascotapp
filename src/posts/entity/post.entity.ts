@@ -16,5 +16,5 @@ export class Post {
 
     @OneToOne(() => User, user => user.id)
     @JoinColumn()
-    user: User;
+    userId: string;
 }

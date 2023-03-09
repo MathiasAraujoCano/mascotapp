@@ -15,8 +15,8 @@ export class Dog {
     color: string;
 
     @Column()
-    born: Date;
+    born?: Date;
 
     @ManyToOne(() => User, user => user.id)
-    owner: User;
+    ownerId: string;
 }

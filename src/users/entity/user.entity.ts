@@ -1,6 +1,5 @@
 import { Cat } from "src/cats/entity/cat.entity";
 import { Dog } from "src/dogs/entity/dog.entity";
-import { Post } from "src/posts/entity/post.entity";
 import { Column, Entity, JoinColumn, JoinTable, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 

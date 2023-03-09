@@ -15,12 +15,12 @@ export class Cat {
     @Column()
     color: string;
 
-    @Column()
-    born: Date;
+    @Column({ default: '2020-02-02'})
+    born?: Date;
 
     @ManyToOne(() => User, user => user.id)
-    owner: User;
+    ownerId: string;
 
     @OneToOne(() => Dog, dog => dog.id)
-    bestFriend: Dog;
+    bestFriend?: string;
 }

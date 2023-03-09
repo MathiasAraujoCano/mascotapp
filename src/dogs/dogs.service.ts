@@ -1,85 +1,85 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { AnimalDto } from 'src/common/dto/animal.dto';
-import { v4 as uuid } from 'uuid';
+import { Repository } from 'typeorm';
+import { v4 as uuid, validate as isUUID } from 'uuid';
+import { Dog } from './entity/dog.entity';
 
 @Injectable()
 export class DogsService {
 
-    private Dogs  : AnimalDto[] = [
-        {
-        id: uuid(),
-        name : 'Snoopy',
-        color: ['marron'],
-        age: 3,
-        raza: 'dog',
-        born: new Date('2020-02-02')
-    },
-    {
-        id: uuid(),
-        name : 'Scooby',
-        color: ['negro'],
-        age: 1,
-        raza: 'dog',
-        born: new Date('2020-02-02')
-    },
-]
+    constructor(
 
-    create( animalDto: AnimalDto) {
+        @InjectRepository(Dog)
+        private dogRepository: Repository<Dog>
+    ){}
+
+    
+    async create( animalDto: AnimalDto) {
         
-        const dog: AnimalDto = {
+        const dog: Dog = {
             id: uuid(),
-            name: animalDto.name,
-            color: animalDto.color,
-            age: animalDto.age,
-            raza: animalDto.raza,
-            born: animalDto.born
+            ...animalDto
+
         }
-        const verifyDog = this.Dogs.find(doggy => doggy.id === dog.id)
 
-        if (!verifyDog) {
+        const dogToCreate = this.dogRepository.create(dog)
 
-            this.Dogs.push(dog)
+        await this.dogRepository.save(dogToCreate)
 
-            return dog;
-            
-        } else {
-            throw new BadRequestException(`Already exist a dog with id "${dog.id}"`)
+        return dogToCreate;
+    }
+
+    async findAll() {
+
+        const dog = await this.dogRepository.find()
+
+        return dog;
+    }
+
+
+    async findOne(id: string) {
+
+        let dog: Dog;
+
+        if (isUUID(id)) {
+            dog = await this.dogRepository.findOneBy({id})
+        }  
+        
+        if ( !dog ) {
+            throw new NotFoundException(`Cat with id "${id}" not found`)
         }
-    }
 
-    findAll() {
-        return this.Dogs;
-    }
-
-
-    findOne(id: string) {
-
-        const oneDog = this.Dogs.find(dog => dog.id === id);
-
-        if (!oneDog) throw new NotFoundException(`Dog with id "${id}" not found`)
-
-        return oneDog;
+        return dog;
     }
 
 
-    update( id: string, updateDto: AnimalDto) {
+    async update( id: string, updateDog: AnimalDto) {
 
-        let dogToUpdate = this.findOne(id)
-
-        if (!dogToUpdate) throw new NotFoundException(`Dog with id "${id}" not found`)
-
-        this.Dogs = this.Dogs.map(doggy => {
-            if (doggy.id === id) {
-                dogToUpdate = { ...dogToUpdate, ...updateDto }
-                return dogToUpdate;
-            }
-            return doggy;
+        const dogToUpdate = await this.dogRepository.preload({
+            id,
+            ...updateDog
         })
-        return dogToUpdate;
+
+        if ( !dogToUpdate ) {
+            throw new NotFoundException(`Product with id: ${id} not found`)
+        }
+
+        const userUpdated = this.dogRepository.save(dogToUpdate)
+
+        return userUpdated;
     }
 
 
-    delete( id: string ) {
-        return this.Dogs.filter(dog => dog.id !== id)
+    async delete( id: string ) {
+        const dog = await this.findOne(id)
+
+        if (!dog) {
+            throw new NotFoundException(`User with id "${id}" not found`)
+        }
+
+        await this.dogRepository.remove(dog)
+
+        return `Delete successful`
     }
 }

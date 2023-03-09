@@ -2,10 +2,6 @@ import { IsString, IsUUID, Min, MinLength } from 'class-validator';
 
 
 export class PostDto {
-
-    @IsString()
-    @IsUUID()
-    id: string;
     
     @IsString()
     @MinLength(1)
@@ -18,5 +14,8 @@ export class PostDto {
     @IsString()
     @MinLength(1)
     name: string;
+
+    @IsString()
+    userId: string
 
 }

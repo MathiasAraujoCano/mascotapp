@@ -1,89 +1,84 @@
 import { BadRequestException, Injectable, NotFoundException, Post } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { AnimalDto } from 'src/common/dto/animal.dto';
-import { v4 as uuid } from "uuid";
+import { Repository } from 'typeorm';
+import { v4 as uuid, validate as isUUID } from "uuid";
+import { Cat } from './entity/cat.entity';
 
 @Injectable()
 export class CatsService {
 
-    private Cats  : AnimalDto[] = [
-        {
-        id: uuid(),
-        name : 'Roberto',
-        color: ['negro', 'blanco'],
-        age: 3,
-        raza: 'cat',
-        born: new Date('2020-02-02')
-    },
-    {
-        id: uuid(),
-        name : 'Adolf',
-        color: ['amarillo'],
-        age: 1,
-        raza: 'cat',
-        born: new Date('2020-02-02')
-    },
-]
+   constructor(
+    @InjectRepository(Cat)
+    private catRepository: Repository<Cat>
+   ){} 
 
-    getAll() {
-        return this.Cats;
+    async getAll() {
+        const cat = await this.catRepository.find()
+
+        return cat;
     }
 
 
-    findOne( id: string ) {
+    async findOne( id: string) {
+        
+        let cat: Cat;
 
-        const oneCat = this.Cats.find(cat => cat.id === id )
+        if (isUUID(id)) {
+            cat = await this.catRepository.findOneBy({id})
+        }  
+        
+        if ( !cat ) {
+            throw new NotFoundException(`Cat with id "${id}" not found`)
+        }
 
-        if ( !oneCat ) throw new NotFoundException(`The cat with id "${id}" not found`)
-
-        return oneCat;
+        return cat;
     }
 
 
-    create( animalDto: AnimalDto) {
+    async create( animalDto: AnimalDto){
 
-        const cat : AnimalDto = {
+        const cat : Cat = {
             id: uuid(),
-            name : animalDto.name,
-            color: animalDto.color,
-            age: animalDto.age,
-            raza: animalDto.raza,
-            born: animalDto.born
+            ...animalDto
         }
 
-        const verifyCat = this.Cats.find(kitty => kitty.id === cat.id)
+        const catToCreate = this.catRepository.create(cat)
 
-        if (!verifyCat) {
+        await this.catRepository.save(catToCreate)
 
-            this.Cats.push(cat)
-
-            return cat;
-            
-        } else {
-            throw new BadRequestException(`Already exist a cat with id "${cat.id}"`)
-        }
+        return catToCreate;
 
     }
 
 
-    update( id: string, updateDto: AnimalDto) {
+    async update( id: string, updateCat: AnimalDto) {
 
-        let catToUpdate = this.findOne( id )
-
-        if (!catToUpdate) throw new NotFoundException(`Cat with id "${id}" not found`)
-
-        this.Cats = this.Cats.map( kitty => {
-            if ( kitty.id === id ) {
-                catToUpdate = { ...catToUpdate, ...updateDto }
-                return catToUpdate; 
-            }
-            return kitty;
+        const catToUpdate = await this.catRepository.preload({
+            id,
+            ...updateCat
         })
 
-        return catToUpdate;
+        if ( !catToUpdate ) {
+            throw new NotFoundException(`Product with id: ${id} not found`)
+        }
+
+        const userUpdated = this.catRepository.save(catToUpdate)
+
+        return userUpdated;
     }
 
 
-    delete( id: string) {
-        return this.Cats.filter(cat => cat.id !== id)
+    async delete( id: string) {
+
+        const cat = await this.findOne(id)
+
+        if (!cat) {
+            throw new NotFoundException(`User with id "${id}" not found`)
+        }
+
+        await this.catRepository.remove(cat)
+
+        return `Delete successful`
     }
 }

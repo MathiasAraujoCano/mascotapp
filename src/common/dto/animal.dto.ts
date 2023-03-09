@@ -1,31 +1,34 @@
 import { Type } from "class-transformer";
-import { IsArray, IsDate, IsIn, IsInt, IsString, IsUUID, MinDate, MinLength } from "class-validator";
+import { IsArray, IsDate, IsIn, IsInt, IsOptional, IsString, IsUUID, MinDate, MinLength } from "class-validator";
 
 
 export class AnimalDto {
 
     @IsString()
-    @IsUUID()
-    id: string;
-
-    @IsString()
     @MinLength(1)
     name: string;
 
-    @IsString({ each: true })
-    @IsArray()
-    color: string[];
+    @IsString()
+    color: string;
 
     @IsInt()
     age: number;
 
     @IsDate()
+    @IsOptional()
     @Type(() => Date)
-    born: Date;
+    born?: Date;
 
     @IsString()
     @IsIn(['dog', 'cat', 'bird', 'rabbit'])
     raza: string;
+
+    @IsString()
+    ownerId: string;
+
+    @IsString()
+    @IsOptional()
+    bestFriend?: string;
 }
 
 
